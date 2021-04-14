@@ -17,25 +17,35 @@ statename=sort(c(state.name,'District of Columbia','Puerto Rico'))
 
 #============R Shiny=========
 
-crime_ui = fluidPage(
+crime_ui = pageWithSidebar(
   titlePanel("CDC Crime Rate Analytics"),
-  sidebarLayout(
-    #add control widgets
-    sidebarPanel(
-      selectInput("selectedoffense","Offense",choices=list("VIOLENTCRIME",
-      "MURDER","RAPE","ROBBERY","AGGRAVATEDASSAULT","PROPERTYCRIME",
-      "BURGLARY","LARCENYTHEFT","MOTORVEHICLETHEFT"),selected="VIOLENTCRIME"),
-      selectInput("selectedstate","Jurisdiction",
-      choices = statename,selected = "Alabama"),
-      sliderInput("selectedyear","Year:",
-                  min = 1999,max = 2019,value=2019),
-      sliderInput("selectedrange","Range:",
-                  min=1999,max=2019,value=c(1999,2019))),
+  sidebarPanel(
+      ## conditionalPanel() functions for selected tab
+     conditionalPanel(condition="input.tabselected==1",
+                     selectInput("selectedoffense","Offense",choices=list("VIOLENTCRIME",
+                                 "MURDER","RAPE","ROBBERY","AGGRAVATEDASSAULT","PROPERTYCRIME",
+                                 "BURGLARY","LARCENYTHEFT","MOTORVEHICLETHEFT"),selected="VIOLENTCRIME"),
+                     sliderInput("selectedyear","Year:",
+                                   min = 1999,max = 2019,value=2019)),
+     conditionalPanel(condition="input.tabselected==2",
+                     selectInput("selectedoffense","Offense",choices=list("VIOLENTCRIME",
+                                 "MURDER","RAPE","ROBBERY","AGGRAVATEDASSAULT","PROPERTYCRIME", 
+                                 "BURGLARY","LARCENYTHEFT","MOTORVEHICLETHEFT"),selected="VIOLENTCRIME"),
+                     selectInput("selectedstate","Jurisdiction",
+                                   choices = statename,selected = "Alabama")),
+     conditionalPanel(condition="input.tabselected==3",
+                     selectInput("selectedoffense","Offense",choices=list("VIOLENTCRIME",
+                                 "MURDER","RAPE","ROBBERY","AGGRAVATEDASSAULT","PROPERTYCRIME",
+                                 "BURGLARY","LARCENYTHEFT","MOTORVEHICLETHEFT"),selected="VIOLENTCRIME"),
+                     sliderInput("selectedrange","Range:",
+                                   min=1999,max=2019,value=c(1999,2019)))
+      ),
     mainPanel(
       tabsetPanel(
-        tabPanel("Rate map Plot",leafletOutput(outputId = "Dmap")),
-        tabPanel("Timeseries Plot", plotOutput(outputId = "timeseries")),
-        tabPanel("Change Plot",leafletOutput(outputId = "delta"))))))
+        tabPanel("Rate map Plot",value=1,leafletOutput(outputId = "Dmap")),
+        tabPanel("Timeseries Plot",value=2, plotOutput(outputId = "timeseries")),
+        tabPanel("Change Plot",value=3,leafletOutput(outputId = "delta")),
+        id = "tabselected")))
 
 crime_server <- function(input, output) {
   #reactive expressions
